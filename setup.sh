@@ -3,8 +3,8 @@
 set -e  
 set -o pipefail
 
-common_software=(
-    git stow make cmake fzf ripgrep tmux zsh unzip python3
+common_software=( 
+    git stow make cmake fzf ripgrep tmux zsh unzip
 )
 
 detect_distro() {
@@ -87,14 +87,8 @@ install_common_packages() {
 install_ubuntu_specific_packages() {
     local ubuntu_packages=(
         manpages-dev man-db manpages-posix-dev zoxide
-        libsecret-1-dev gnome-keyring default-jre libgbm-dev python3-pip
+        libsecret-1-dev gnome-keyring default-jre libgbm-dev 
     )
-
-    if [[ $CODESPACES == "true" ]]; then
-        sudo apt-get install python3.10-venv -y
-    else
-        sudo apt-get install python3.12-venv -y
-    fi
 
     for pkg in "${ubuntu_packages[@]}"; do
         if ! dpkg -s "$pkg" &> /dev/null; then
@@ -104,6 +98,11 @@ install_ubuntu_specific_packages() {
             echo "$pkg is already installed."
         fi
     done
+
+    sudo apt install software-properties-common
+    sudo add-apt-repository ppa:deadsnakes/ppa
+    sudo apt install python3.10
+    sudo apt-get install python3.10-venv -y
 }
 
 install_nvm() {
@@ -138,7 +137,7 @@ setup_dotfiles() {
         stow . --adopt -t ~
     fi
 }
-# Install Neovim on Ubuntu/Debian
+
 install_neovim_ubuntu() {
     echo "Adding Neovim PPA and installing Neovim..."
     
@@ -151,19 +150,21 @@ install_neovim_ubuntu() {
     fi
 }
 
-
-# Arch Linux package installation function
 install_packages_arch() {
-    echo "Updating package list and upgrading installed packages..."
-    yay -Syu --noconfirm
 
-    install_common_software "yay" "yay -S --noconfirm"
+    for pkg in "${common_softwar[@]}"; do
+        
+        if ! yay -Qi "$pkg" &> /dev/null; then
+            echo "Installing $pkg..."
+            yay -S --noconfirm "$pkg"
+	 else
+            echo "$pkg is already installed."
+	fi
+    done
 
     # Additional packages specific to Arch Linux
     local arch_packages=(
-        man-db man-pages libsecret gnome-keyring jdk-openjdk
-        brave-bin acpi qmk-git obsidian deno mermaid-cli d2
-        plantuml imagemagick
+        man-db man-pages libsecret acpi d2 starship neovim bat zoxide
     )
 
     for pkg in "${arch_packages[@]}"; do
@@ -178,7 +179,6 @@ install_packages_arch() {
     install_neovim_arch
 }
 
-# Install yay on Arch Linux
 install_yay() {
     if ! command -v yay &> /dev/null; then
         echo "Installing yay AUR helper..."
@@ -193,8 +193,6 @@ install_yay() {
     fi
 }
 
-
-# Install Neovim on Arch Linux using yay
 install_neovim_arch() {
     echo "Installing Neovim..."
     if ! command -v nvim &> /dev/null; then
@@ -204,7 +202,6 @@ install_neovim_arch() {
     fi
 }
 
-# Homebrew and software installation for macO
 install_homebrew_mac() {
     if ! command -v brew &> /dev/null; then
         echo "Installing Homebrew..."
@@ -264,7 +261,6 @@ install_homebrew_mac() {
     sudo spctl --master-disable
 
     curl -fsSL https://bun.sh/install | bash
-
 }
 
 clone_repositories() {
@@ -274,7 +270,6 @@ clone_repositories() {
     mkdir ~/projects
   fi
 
-  # List of repositories to clone
   REPOSITORIES=(
     "git@github.com:eduuh/byte_safari.git"
     "git@github.com:eduuh/keyboard.git"
@@ -287,14 +282,6 @@ clone_repositories() {
       REPOSITORIES=(
           "https://github.com/eduuh/nvim.git"
           "https://github.com/eduuh/dotfiles.git"
-      )
-  else
-      REPOSITORIES=(
-          "git@github.com:eduuh/byte_safari.git"
-          "git@github.com:eduuh/keyboard.git"
-          "git@github.com:eduuh/homelab.git"
-          "git@github.com:eduuh/nvim.git"
-          "git@github.com:eduuh/dotfiles.git"
       )
   fi
     
@@ -373,5 +360,5 @@ main() {
     esac
 }
 
-
 main
+
