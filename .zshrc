@@ -62,7 +62,7 @@ eval "$(starship init zsh)"
 export PATH="${PATH}:$HOME/.bin/"
 ensure_tmux_is_running() {
   if [[ -z "$TMUX" ]]; then
-    tat 
+    ~/.bin/tat.sh
   fi
 }
 
