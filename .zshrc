@@ -28,7 +28,7 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
 # Azure auth path (if applicable)
-export PATH="${PATH}:/Users/edwinmurayawork/.azureauth/0.8.4"
+export PATH="${PATH}:/mnt/c/Users/edwinmuraya/AppData/Local/Programs/AzureAuth/0.9.1"
 
 # Byte Safari tools path (if applicable)
 export PATH="${PATH}:~/projects/byte_safari/tools/bash/"
@@ -137,3 +137,11 @@ ap() {
   esac
 }
 
+
+# pnpm
+export PNPM_HOME="/home/eduuh/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
