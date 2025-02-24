@@ -29,6 +29,7 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 # Azure auth path (if applicable)
 export PATH="${PATH}:/mnt/c/Users/edwinmuraya/AppData/Local/Programs/AzureAuth/0.9.1"
+export PATH="${PATH}:/mnt/c/Windows/System32:/mnt/c/Windows:/mnt/c/Windows/System32/WindowsPowerShell/v1.0"
 
 # Byte Safari tools path (if applicable)
 export PATH="${PATH}:~/projects/byte_safari/tools/bash/"
