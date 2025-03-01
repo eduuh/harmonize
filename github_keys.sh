@@ -12,7 +12,6 @@ install_for_ubuntu() {
     sudo apt-get install -y gh zsh openssh-client || error_exit "Failed to install packages on Ubuntu"
 }
 
-# Function to install required packages for Arch Linux
 install_for_arch() {
     sudo pacman -Syu --noconfirm || error_exit "Failed to update package list on Arch"
     sudo pacman -S --noconfirm github-cli zsh openssh || error_exit "Failed to install packages on Arch"
@@ -28,13 +27,20 @@ install_for_macos() {
     brew install gh zsh openssh || error_exit "Failed to install packages on macOS"
 }
 
-# Determine the operating system and install the required packages
+install_for_fedora_asahi_remix() {
+    sudo dnf update -y || error_exit "Failed to update package list on Fedora-Asahi-Remix"
+    sudo dnf install -y gh zsh openssh || error_exit "Failed to install packages on Fedora-Asahi-Remix"
+}
+
+# Detect OS and install dependencies
 if [ -f /etc/os-release ]; then
     . /etc/os-release
     if [[ "$ID" == "ubuntu" || "$ID_LIKE" == "debian" ]]; then
         install_for_ubuntu
     elif [[ "$ID" == "arch" ]]; then
         install_for_arch
+    elif [[ "$ID" == "fedora-asahi-remix" ]]; then
+        install_for_fedora_asahi_remix
     else
         error_exit "Unsupported Linux distribution: $ID"
     fi
@@ -53,13 +59,14 @@ fi
 eval "$(ssh-agent -s)" || error_exit "Failed to start ssh-agent"
 ssh-add ~/.ssh/id_rsa || error_exit "Failed to add SSH key to ssh-agent"
 
-# Authenticate with GitHub using gh CLI
+# Authenticate with GitHub using gh CLI and ensure the correct scope is set
 if ! gh auth status &>/dev/null; then
-    gh auth login -w || error_exit "Failed to authenticate with GitHub using gh CLI"
+    gh auth login --scopes "read:public_key,write:public_key" || error_exit "Failed to authenticate with GitHub using gh CLI"
+else
+    gh auth refresh -h github.com -s admin:public_key || error_exit "Failed to refresh GitHub authentication with admin:public_key scope"
 fi
 
 # Add SSH key to GitHub using gh CLI
-gh ssh-key add ~/.ssh/id_rsa.pub --title "Automated Key $(date +'%Y-%m-%d')" || error_exit "Failed to add SSH key to GitHub"
-
-echo "SSH key added to GitHub successfully."
-
+if gh ssh-key add ~/.ssh/id_rsa.pub --title "Automated Key $(date +'%Y-%m-%d')"; then
+    echo "SSH key added to GitHub successfully."
+fi
